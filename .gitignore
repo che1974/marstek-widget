@@ -2,3 +2,5 @@
 .swiftpm/
 .vscode/
 .DS_Store
+*.app/
+*.zip
