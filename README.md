@@ -2,7 +2,7 @@
 
 macOS menu bar widget that shows real-time status of your Marstek home battery (Venus A and compatible models). Battery charge level, solar production, grid import/export — all visible at a glance without opening the Marstek app.
 
-<!-- ![Screenshot](screenshot.png) -->
+![Screenshot](docs/screenshot.png)
 
 ## What it shows
 
