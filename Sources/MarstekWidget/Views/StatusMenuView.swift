@@ -121,7 +121,7 @@ struct StatusMenuView: View {
         let s = monitor.status
 
         if let grid = s.gridPower {
-            let direction = grid > 0 ? "importing" : grid < 0 ? "exporting" : ""
+            let direction = grid < 0 ? "importing" : grid > 0 ? "exporting" : ""
             StatusRow(icon: "powerplug", label: "Grid Power",
                       value: formatPower(abs(grid)) + (direction.isEmpty ? "" : " (\(direction))"))
         }

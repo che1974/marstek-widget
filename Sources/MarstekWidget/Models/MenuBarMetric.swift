@@ -24,8 +24,8 @@ enum MenuBarMetric: String, CaseIterable, Identifiable {
         case .none, .batteryIcon: return nil
         case .soc: return status.soc.map { "\($0)%" }
         case .load: return status.offgridPower.map { formatFlow($0, positive: "↑", negative: "↓") }
-        // Positive grid power is import, into the station.
-        case .grid: return status.gridPower.map { formatFlow($0, positive: "↓", negative: "↑") }
+        // Negative grid power is the station charging from the grid.
+        case .grid: return status.gridPower.map { formatFlow($0, positive: "↑", negative: "↓") }
         case .pv: return status.pvPower.map(formatPower)
         }
     }
