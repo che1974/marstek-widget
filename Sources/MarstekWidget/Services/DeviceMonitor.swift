@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UserNotifications
 
 enum ConnectionState: Equatable {
     case disconnected
@@ -43,7 +44,14 @@ final class DeviceMonitor {
         set { UserDefaults.standard.set(newValue, forKey: "launchAtLogin") }
     }
 
+    var notifyGridReturn: Bool {
+        UserDefaults.standard.object(forKey: "notifyGridReturn") as? Bool ?? true
+    }
+
     func start() {
+        if notifyGridReturn {
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        }
         guard !deviceIP.isEmpty else { return }
         client = MarstekAPIClient(host: deviceIP)
         restartPolling()
@@ -73,6 +81,7 @@ final class DeviceMonitor {
     private static let requestGap: Duration = .seconds(3)
     private var isPolling = false
     private var pollCount = 0
+    private var wasGridOn: Bool?
 
     func poll(full: Bool = false) {
         guard let client, !isPolling else { return }
@@ -88,6 +97,7 @@ final class DeviceMonitor {
                     self.status.esStatus = esResult
                     self.status.lastUpdated = Date()
                     self.connectionState = .connected
+                    self.checkGridReturn()
                 }
                 if fetchAll {
                     try await Task.sleep(for: Self.requestGap)
@@ -108,6 +118,18 @@ final class DeviceMonitor {
                 }
             }
         }
+    }
+
+    private func checkGridReturn() {
+        let gridOn = status.hasGridPower
+        if gridCameBack(was: wasGridOn, now: gridOn), notifyGridReturn {
+            let content = UNMutableNotificationContent()
+            content.title = "Grid is back"
+            content.body = status.gridPower.map { "Grid power: \(formatPower(abs($0)))" } ?? ""
+            content.sound = .default
+            UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
+        }
+        if let gridOn { wasGridOn = gridOn }
     }
 
     func setMode(_ mode: String) {

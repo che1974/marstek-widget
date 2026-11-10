@@ -119,6 +119,13 @@ struct CombinedStatus {
         esStatus?.ongridPower
     }
 
+    // Below this the grid port reading is sensor noise, not a live grid.
+    static let gridPresentThreshold = 20
+
+    var hasGridPower: Bool? {
+        gridPower.map { abs($0) >= Self.gridPresentThreshold }
+    }
+
     var offgridPower: Int? {
         esStatus?.offgridPower
     }
@@ -151,4 +158,8 @@ struct CombinedStatus {
         if isDischarging { return "Discharging" }
         return "Idle"
     }
+}
+
+func gridCameBack(was: Bool?, now: Bool?) -> Bool {
+    was == false && now == true
 }

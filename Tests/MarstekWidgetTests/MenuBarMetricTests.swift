@@ -62,3 +62,27 @@ import Testing
     // No data yet: never leave the status item blank and unclickable.
     #expect(showsBatteryGlyph(leading: .load, leadingText: nil, lines: []))
 }
+
+@Test func gridPresenceIgnoresSensorNoise() {
+    func status(grid: Int?) -> CombinedStatus {
+        var s = CombinedStatus()
+        s.esStatus = ESStatus(id: 0, batSoc: nil, batCap: nil, pvPower: nil, ongridPower: grid, offgridPower: nil,
+                              totalPvEnergy: nil, totalGridOutputEnergy: nil, totalGridInputEnergy: nil, totalLoadEnergy: nil)
+        return s
+    }
+    #expect(status(grid: nil).hasGridPower == nil)
+    #expect(status(grid: 0).hasGridPower == false)
+    #expect(status(grid: 15).hasGridPower == false)
+    #expect(status(grid: -15).hasGridPower == false)
+    #expect(status(grid: 350).hasGridPower == true)
+    #expect(status(grid: -1250).hasGridPower == true)
+}
+
+@Test func gridCameBackOnlyOnOffToOn() {
+    #expect(gridCameBack(was: false, now: true))
+    #expect(!gridCameBack(was: nil, now: true))
+    #expect(!gridCameBack(was: true, now: true))
+    #expect(!gridCameBack(was: true, now: false))
+    #expect(!gridCameBack(was: false, now: false))
+    #expect(!gridCameBack(was: false, now: nil))
+}

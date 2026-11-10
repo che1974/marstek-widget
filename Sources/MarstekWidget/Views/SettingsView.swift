@@ -16,6 +16,7 @@ struct SettingsView: View {
     @AppStorage("menuBarBottomLine") private var bottomLine = MenuBarMetric.none
     @AppStorage("menuBarLeading") private var leading = MenuBarMetric.batteryIcon
     @AppStorage("allowModeSwitch") private var allowModeSwitch = false
+    @AppStorage("notifyGridReturn") private var notifyGridReturn = true
 
     private let intervalOptions: [(String, TimeInterval)] = [
         ("30 seconds", 30),
@@ -78,6 +79,7 @@ struct SettingsView: View {
                     set: { monitor.launchAtLogin = $0 }
                 ))
                 Toggle("Allow switching mode from menu", isOn: $allowModeSwitch)
+                Toggle("Notify when grid comes back", isOn: $notifyGridReturn)
             }
         }
         .formStyle(.grouped)
