@@ -23,7 +23,7 @@ actor MarstekAPIClient {
     private let timeout: TimeInterval
     private let maxRetries: Int
 
-    init(host: String, port: UInt16 = 30000, timeout: TimeInterval = 5, maxRetries: Int = 2) {
+    init(host: String, port: UInt16 = 30000, timeout: TimeInterval = 10, maxRetries: Int = 1) {
         self.host = host
         self.port = port
         self.timeout = timeout
@@ -84,7 +84,7 @@ actor MarstekAPIClient {
             } catch {
                 lastError = error
                 if attempt < maxRetries {
-                    try await Task.sleep(for: .milliseconds(500))
+                    try await Task.sleep(for: .seconds(3))
                 }
             }
         }

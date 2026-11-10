@@ -119,6 +119,13 @@ struct CombinedStatus {
         esStatus?.ongridPower
     }
 
+    // Below this the grid port reading is sensor noise, not a live grid.
+    static let gridPresentThreshold = 20
+
+    var hasGridPower: Bool? {
+        gridPower.map { abs($0) >= Self.gridPresentThreshold }
+    }
+
     var offgridPower: Int? {
         esStatus?.offgridPower
     }
@@ -135,10 +142,25 @@ struct CombinedStatus {
         batStatus?.dischrgFlag ?? false
     }
 
+    // The Marstek app calls the API's "Manual" mode UPS.
+    var modeLabel: String? {
+        esMode?.mode.map { $0 == "Manual" ? "UPS" : $0 }
+    }
+
+    // Both flags are set in standby/UPS, even while charging, so negative grid power decides there.
+    var showsChargingIcon: Bool {
+        (isCharging && !isDischarging) || (gridPower ?? 0) <= -Self.gridPresentThreshold
+    }
+
     var batteryStateText: String {
+        if showsChargingIcon { return "Charging" }
         if isCharging && isDischarging { return "Standby" }
         if isCharging { return "Charging" }
         if isDischarging { return "Discharging" }
         return "Idle"
     }
+}
+
+func gridCameBack(was: Bool?, now: Bool?) -> Bool {
+    was == false && now == true
 }

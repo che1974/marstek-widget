@@ -11,6 +11,10 @@ let package = Package(
         .executableTarget(
             name: "MarstekWidget",
             path: "Sources/MarstekWidget"
+        ),
+        .testTarget(
+            name: "MarstekWidgetTests",
+            dependencies: ["MarstekWidget"]
         )
     ]
 )

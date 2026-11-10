@@ -28,7 +28,7 @@ final class SettingsWindowManager {
 
         let settingsView = SettingsView(monitor: monitor)
         let hostingView = NSHostingView(rootView: settingsView)
-        hostingView.frame = NSRect(x: 0, y: 0, width: 350, height: 280)
+        hostingView.frame = NSRect(x: 0, y: 0, width: 350, height: 450)
 
         let window = SettingsWindow(
             contentRect: hostingView.frame,

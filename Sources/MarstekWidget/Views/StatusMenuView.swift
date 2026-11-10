@@ -2,6 +2,7 @@ import SwiftUI
 
 struct StatusMenuView: View {
     @Environment(DeviceMonitor.self) private var monitor
+    @AppStorage("allowModeSwitch") private var allowModeSwitch = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -41,7 +42,7 @@ struct StatusMenuView: View {
             }
 
             // Mode switcher
-            if monitor.status.esMode != nil {
+            if allowModeSwitch && monitor.status.esMode != nil {
                 Divider()
                 modePicker
             }
@@ -70,7 +71,7 @@ struct StatusMenuView: View {
             .keyboardShortcut(",", modifiers: .command)
 
             Button("Refresh Now") {
-                monitor.poll()
+                monitor.poll(full: true)
             }
             .keyboardShortcut("r", modifiers: .command)
 
@@ -102,7 +103,7 @@ struct StatusMenuView: View {
                 }
                 HStack(spacing: 6) {
                     Text(monitor.status.batteryStateText)
-                    if let mode = monitor.status.esMode?.mode {
+                    if let mode = monitor.status.modeLabel {
                         Text("·")
                         Text(mode)
                     }
@@ -120,7 +121,7 @@ struct StatusMenuView: View {
         let s = monitor.status
 
         if let grid = s.gridPower {
-            let direction = grid > 0 ? "importing" : grid < 0 ? "exporting" : ""
+            let direction = grid < 0 ? "importing" : grid > 0 ? "exporting" : ""
             StatusRow(icon: "powerplug", label: "Grid Power",
                       value: formatPower(abs(grid)) + (direction.isEmpty ? "" : " (\(direction))"))
         }
@@ -165,7 +166,7 @@ struct StatusMenuView: View {
 
     private var batteryIcon: String {
         guard let soc = monitor.status.soc else { return "battery.0" }
-        if monitor.status.isCharging { return "battery.100.bolt" }
+        if monitor.status.showsChargingIcon { return "battery.100.bolt" }
         switch soc {
         case 75...100: return "battery.100"
         case 50..<75: return "battery.75"
@@ -209,13 +210,6 @@ struct StatusMenuView: View {
             return String(format: "%.1f kWh", Double(wh) / 1000)
         }
         return "\(wh) Wh"
-    }
-
-    private func formatPower(_ watts: Int) -> String {
-        if abs(watts) >= 1000 {
-            return String(format: "%.1f kW", Double(watts) / 1000)
-        }
-        return "\(watts) W"
     }
 }
 

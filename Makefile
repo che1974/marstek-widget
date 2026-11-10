@@ -12,6 +12,7 @@ app: build
 	mkdir -p $(APP_BUNDLE)/Contents/Resources
 	cp .build/release/$(APP_NAME) $(APP_BUNDLE)/Contents/MacOS/
 	cp Info.plist $(APP_BUNDLE)/Contents/
+	cp AppIcon.icns $(APP_BUNDLE)/Contents/Resources/
 
 zip: app
 	rm -f $(APP_NAME).zip
@@ -31,6 +32,7 @@ app-arm64: build-arm64
 	mkdir -p $(APP_BUNDLE)/Contents/Resources
 	cp .build/release/$(APP_NAME) $(APP_BUNDLE)/Contents/MacOS/
 	cp Info.plist $(APP_BUNDLE)/Contents/
+	cp AppIcon.icns $(APP_BUNDLE)/Contents/Resources/
 
 app-x86_64: build-x86_64
 	rm -rf $(APP_BUNDLE)
@@ -38,6 +40,7 @@ app-x86_64: build-x86_64
 	mkdir -p $(APP_BUNDLE)/Contents/Resources
 	cp .build/release/$(APP_NAME) $(APP_BUNDLE)/Contents/MacOS/
 	cp Info.plist $(APP_BUNDLE)/Contents/
+	cp AppIcon.icns $(APP_BUNDLE)/Contents/Resources/
 
 # Create zips for each architecture
 zip-arm64: app-arm64

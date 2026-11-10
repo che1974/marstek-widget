@@ -12,6 +12,12 @@ struct SettingsView: View {
         case failure
     }
 
+    @AppStorage("menuBarTopLine") private var topLine = MenuBarMetric.soc
+    @AppStorage("menuBarBottomLine") private var bottomLine = MenuBarMetric.none
+    @AppStorage("menuBarLeading") private var leading = MenuBarMetric.batteryIcon
+    @AppStorage("allowModeSwitch") private var allowModeSwitch = false
+    @AppStorage("notifyGridReturn") private var notifyGridReturn = true
+
     private let intervalOptions: [(String, TimeInterval)] = [
         ("30 seconds", 30),
         ("1 minute", 60),
@@ -55,15 +61,29 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Menu Bar") {
+                Picker("Left", selection: $leading) {
+                    ForEach(MenuBarMetric.allCases) { Text($0.title).tag($0) }
+                }
+                Picker("Top line", selection: $topLine) {
+                    ForEach(MenuBarMetric.lineChoices) { Text($0.title).tag($0) }
+                }
+                Picker("Bottom line", selection: $bottomLine) {
+                    ForEach(MenuBarMetric.lineChoices) { Text($0.title).tag($0) }
+                }
+            }
+
             Section("General") {
                 Toggle("Launch at login", isOn: Binding(
                     get: { monitor.launchAtLogin },
                     set: { monitor.launchAtLogin = $0 }
                 ))
+                Toggle("Allow switching mode from menu", isOn: $allowModeSwitch)
+                Toggle("Notify when grid comes back", isOn: $notifyGridReturn)
             }
         }
         .formStyle(.grouped)
-        .frame(width: 350, height: 280)
+        .frame(width: 350, height: 450)
         .onAppear {
             ipAddress = monitor.deviceIP
             selectedInterval = monitor.pollingInterval
