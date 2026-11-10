@@ -10,3 +10,25 @@ import Testing
     #expect(menuBarLines(s, [.pv, .soc]) == ["80%"])
     #expect(menuBarLines(CombinedStatus(), [.soc, .load]) == [])
 }
+
+@Test func boltOnlyWhenChargingWithoutDischarging() {
+    func status(charging: Bool, discharging: Bool) -> CombinedStatus {
+        var s = CombinedStatus()
+        s.batStatus = BatStatus(id: 0, soc: 78, chargFlag: charging, dischrgFlag: discharging,
+                                batTemp: nil, batCapacity: nil, ratedCapacity: nil)
+        return s
+    }
+    #expect(status(charging: true, discharging: false).showsChargingBolt)
+    #expect(!status(charging: true, discharging: true).showsChargingBolt)
+    #expect(!status(charging: false, discharging: true).showsChargingBolt)
+    #expect(!CombinedStatus().showsChargingBolt)
+}
+
+@Test func manualModeIsShownAsUPS() {
+    var s = CombinedStatus()
+    #expect(s.modeLabel == nil)
+    s.esMode = ESMode(id: 0, mode: "Manual", ongridPower: nil, offgridPower: nil, batSoc: nil)
+    #expect(s.modeLabel == "UPS")
+    s.esMode = ESMode(id: 0, mode: "Auto", ongridPower: nil, offgridPower: nil, batSoc: nil)
+    #expect(s.modeLabel == "Auto")
+}

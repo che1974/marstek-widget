@@ -21,7 +21,7 @@ struct MenuBarLabel: View {
         let renderer = ImageRenderer(content:
             HStack(spacing: 4) {
                 if showIcon || lines.isEmpty {
-                    BatteryGlyph(soc: monitor.status.soc, isCharging: monitor.status.isCharging)
+                    BatteryGlyph(soc: monitor.status.soc, isCharging: monitor.status.showsChargingBolt)
                 }
                 VStack(alignment: .trailing, spacing: -2) {
                     ForEach(lines.indices, id: \.self) { Text(lines[$0]) }
@@ -45,21 +45,25 @@ struct BatteryGlyph: View {
     var body: some View {
         HStack(spacing: 1) {
             ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 3.5).opacity(0.35)
-                RoundedRectangle(cornerRadius: 3.5)
+                Rectangle().opacity(0.35)
+                Rectangle()
                     .frame(width: 23 * Double(min(max(soc ?? 0, 0), 100)) / 100)
                 HStack(spacing: 0) {
                     if let soc { Text("\(soc)") }
-                    if isCharging { Image(systemName: "bolt.fill").font(.system(size: 7, weight: .bold)) }
+                    if isCharging { Image(systemName: "bolt.fill").font(.system(size: 9, weight: .semibold)) }
                 }
-                .font(.system(size: 9, weight: .bold).monospacedDigit())
+                .font(.system(size: 11, weight: .medium).monospacedDigit())
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .padding(.horizontal, 1.5)
                 .frame(maxWidth: .infinity)
                 .blendMode(.destinationOut)
             }
             .compositingGroup()
-            .frame(width: 23, height: 11)
-            RoundedRectangle(cornerRadius: 1)
-                .frame(width: 1.5, height: 3.5)
+            .frame(width: 23, height: 12)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+            RoundedRectangle(cornerRadius: 0.75)
+                .frame(width: 1.5, height: 4)
                 .opacity(0.35)
         }
     }

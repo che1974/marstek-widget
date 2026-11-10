@@ -84,28 +84,23 @@ final class DeviceMonitor {
         Task {
             do {
                 let esResult = try await client.getESStatus()
-                var batResult: BatStatus?, emResult: EMStatus?, modeResult: ESMode?
-                if fetchAll {
-                    try await Task.sleep(for: Self.requestGap)
-                    batResult = try await client.getBatStatus()
-                    try await Task.sleep(for: Self.requestGap)
-                    emResult = try await client.getEMStatus()
-                    try await Task.sleep(for: Self.requestGap)
-                    modeResult = try await client.getESMode()
-                }
-                let (bat, em, mode) = (batResult, emResult, modeResult)
-
                 await MainActor.run {
                     self.status.esStatus = esResult
-                    if fetchAll {
-                        self.status.batStatus = bat
-                        self.status.emStatus = em
-                        self.status.esMode = mode
-                    }
                     self.status.lastUpdated = Date()
                     self.connectionState = .connected
-                    self.isPolling = false
                 }
+                if fetchAll {
+                    try await Task.sleep(for: Self.requestGap)
+                    let bat = try await client.getBatStatus()
+                    await MainActor.run { self.status.batStatus = bat }
+                    try await Task.sleep(for: Self.requestGap)
+                    let em = try await client.getEMStatus()
+                    await MainActor.run { self.status.emStatus = em }
+                    try await Task.sleep(for: Self.requestGap)
+                    let mode = try await client.getESMode()
+                    await MainActor.run { self.status.esMode = mode }
+                }
+                await MainActor.run { self.isPolling = false }
             } catch {
                 await MainActor.run {
                     self.connectionState = .error(error.localizedDescription)

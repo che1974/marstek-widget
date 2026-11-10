@@ -135,6 +135,16 @@ struct CombinedStatus {
         batStatus?.dischrgFlag ?? false
     }
 
+    // The Marstek app calls the API's "Manual" mode UPS.
+    var modeLabel: String? {
+        esMode?.mode.map { $0 == "Manual" ? "UPS" : $0 }
+    }
+
+    // Both flags are set in standby/UPS, which is not charging.
+    var showsChargingBolt: Bool {
+        isCharging && !isDischarging
+    }
+
     var batteryStateText: String {
         if isCharging && isDischarging { return "Standby" }
         if isCharging { return "Charging" }

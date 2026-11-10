@@ -103,7 +103,7 @@ struct StatusMenuView: View {
                 }
                 HStack(spacing: 6) {
                     Text(monitor.status.batteryStateText)
-                    if let mode = monitor.status.esMode?.mode {
+                    if let mode = monitor.status.modeLabel {
                         Text("·")
                         Text(mode)
                     }
@@ -166,7 +166,7 @@ struct StatusMenuView: View {
 
     private var batteryIcon: String {
         guard let soc = monitor.status.soc else { return "battery.0" }
-        if monitor.status.isCharging { return "battery.100.bolt" }
+        if monitor.status.showsChargingBolt { return "battery.100.bolt" }
         switch soc {
         case 75...100: return "battery.100"
         case 50..<75: return "battery.75"
