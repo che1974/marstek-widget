@@ -5,10 +5,22 @@ import Testing
     var s = CombinedStatus()
     s.esStatus = ESStatus(id: 0, batSoc: 80, batCap: nil, pvPower: nil, ongridPower: -1250, offgridPower: 351,
                           totalPvEnergy: nil, totalGridOutputEnergy: nil, totalGridInputEnergy: nil, totalLoadEnergy: nil)
-    #expect(menuBarLines(s, [.soc, .load]) == ["80%", "351 W"])
-    #expect(menuBarLines(s, [.grid, .none]) == ["-1.2 kW"])
+    #expect(menuBarLines(s, [.soc, .load]) == ["80%", "351 W ↑"])
+    #expect(menuBarLines(s, [.grid, .none]) == ["1.2 kW ↑"])
     #expect(menuBarLines(s, [.pv, .soc]) == ["80%"])
     #expect(menuBarLines(CombinedStatus(), [.soc, .load]) == [])
+}
+
+// Arrows read like a network meter from the station's side: ↓ in from grid, ↑ out to grid or house.
+@Test func gridAndLoadShowFlowArrows() {
+    func status(grid: Int, load: Int) -> CombinedStatus {
+        var s = CombinedStatus()
+        s.esStatus = ESStatus(id: 0, batSoc: nil, batCap: nil, pvPower: nil, ongridPower: grid, offgridPower: load,
+                              totalPvEnergy: nil, totalGridOutputEnergy: nil, totalGridInputEnergy: nil, totalLoadEnergy: nil)
+        return s
+    }
+    #expect(menuBarLines(status(grid: 350, load: 0), [.grid, .load]) == ["350 W ↓", "0 W"])
+    #expect(menuBarLines(status(grid: 0, load: 1500), [.grid, .load]) == ["0 W", "1.5 kW ↑"])
 }
 
 @Test func boltOnlyWhenChargingWithoutDischarging() {

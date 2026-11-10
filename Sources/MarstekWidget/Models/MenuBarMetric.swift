@@ -23,8 +23,9 @@ enum MenuBarMetric: String, CaseIterable, Identifiable {
         switch self {
         case .none, .batteryIcon: return nil
         case .soc: return status.soc.map { "\($0)%" }
-        case .load: return status.offgridPower.map(formatPower)
-        case .grid: return status.gridPower.map(formatPower)
+        case .load: return status.offgridPower.map { formatFlow($0, positive: "↑", negative: "↓") }
+        // Positive grid power is import, into the station.
+        case .grid: return status.gridPower.map { formatFlow($0, positive: "↓", negative: "↑") }
         case .pv: return status.pvPower.map(formatPower)
         }
     }
@@ -36,6 +37,10 @@ func menuBarLines(_ status: CombinedStatus, _ metrics: [MenuBarMetric]) -> [Stri
 
 func showsBatteryGlyph(leading: MenuBarMetric, leadingText: String?, lines: [String]) -> Bool {
     leading == .batteryIcon || (leadingText == nil && lines.isEmpty)
+}
+
+func formatFlow(_ watts: Int, positive: String, negative: String) -> String {
+    watts == 0 ? formatPower(0) : "\(formatPower(abs(watts))) \(watts > 0 ? positive : negative)"
 }
 
 func formatPower(_ watts: Int) -> String {
