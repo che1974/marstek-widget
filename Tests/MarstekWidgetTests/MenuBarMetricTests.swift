@@ -23,17 +23,23 @@ import Testing
     #expect(menuBarLines(status(grid: 0, load: 1500), [.grid, .load]) == ["0 W", "1.5 kW ↑"])
 }
 
-@Test func boltOnlyWhenChargingWithoutDischarging() {
-    func status(charging: Bool, discharging: Bool) -> CombinedStatus {
+@Test func chargingIconWhenFlagsSayChargingOrGridFlowsIn() {
+    func status(charging: Bool, discharging: Bool, grid: Int? = nil) -> CombinedStatus {
         var s = CombinedStatus()
         s.batStatus = BatStatus(id: 0, soc: 78, chargFlag: charging, dischrgFlag: discharging,
                                 batTemp: nil, batCapacity: nil, ratedCapacity: nil)
+        s.esStatus = ESStatus(id: 0, batSoc: nil, batCap: nil, pvPower: nil, ongridPower: grid, offgridPower: nil,
+                              totalPvEnergy: nil, totalGridOutputEnergy: nil, totalGridInputEnergy: nil, totalLoadEnergy: nil)
         return s
     }
-    #expect(status(charging: true, discharging: false).showsChargingBolt)
-    #expect(!status(charging: true, discharging: true).showsChargingBolt)
-    #expect(!status(charging: false, discharging: true).showsChargingBolt)
-    #expect(!CombinedStatus().showsChargingBolt)
+    #expect(status(charging: true, discharging: false).showsChargingIcon)
+    #expect(!status(charging: true, discharging: true).showsChargingIcon)
+    #expect(!status(charging: false, discharging: true).showsChargingIcon)
+    #expect(!CombinedStatus().showsChargingIcon)
+    // UPS mode sets both flags even while charging, so grid flowing in decides.
+    #expect(status(charging: true, discharging: true, grid: -995).showsChargingIcon)
+    #expect(!status(charging: true, discharging: true, grid: -10).showsChargingIcon)
+    #expect(!status(charging: true, discharging: true, grid: 500).showsChargingIcon)
 }
 
 @Test func manualModeIsShownAsUPS() {

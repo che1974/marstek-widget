@@ -166,7 +166,7 @@ struct StatusMenuView: View {
 
     private var batteryIcon: String {
         guard let soc = monitor.status.soc else { return "battery.0" }
-        if monitor.status.showsChargingBolt { return "battery.100.bolt" }
+        if monitor.status.showsChargingIcon { return "battery.100.bolt" }
         switch soc {
         case 75...100: return "battery.100"
         case 50..<75: return "battery.75"

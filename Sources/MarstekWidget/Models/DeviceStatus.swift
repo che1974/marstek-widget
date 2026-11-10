@@ -147,12 +147,13 @@ struct CombinedStatus {
         esMode?.mode.map { $0 == "Manual" ? "UPS" : $0 }
     }
 
-    // Both flags are set in standby/UPS, which is not charging.
-    var showsChargingBolt: Bool {
-        isCharging && !isDischarging
+    // Both flags are set in standby/UPS, even while charging, so negative grid power decides there.
+    var showsChargingIcon: Bool {
+        (isCharging && !isDischarging) || (gridPower ?? 0) <= -Self.gridPresentThreshold
     }
 
     var batteryStateText: String {
+        if showsChargingIcon { return "Charging" }
         if isCharging && isDischarging { return "Standby" }
         if isCharging { return "Charging" }
         if isDischarging { return "Discharging" }

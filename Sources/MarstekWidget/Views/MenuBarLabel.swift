@@ -22,7 +22,7 @@ struct MenuBarLabel: View {
         let renderer = ImageRenderer(content:
             HStack(spacing: 4) {
                 if showsBatteryGlyph(leading: leading, leadingText: leadingText, lines: lines) {
-                    BatteryGlyph(soc: monitor.status.soc, isCharging: monitor.status.showsChargingBolt)
+                    BatteryGlyph(soc: monitor.status.soc, isCharging: monitor.status.showsChargingIcon)
                 } else if let leadingText {
                     Text(leadingText).font(.system(size: 13, weight: .medium).monospacedDigit())
                 }
@@ -53,7 +53,7 @@ struct BatteryGlyph: View {
                     .frame(width: 23 * Double(min(max(soc ?? 0, 0), 100)) / 100)
                 HStack(spacing: 0) {
                     if let soc { Text("\(soc)") }
-                    if isCharging { Image(systemName: "bolt.fill").font(.system(size: 9, weight: .semibold)) }
+                    if isCharging { Image(systemName: "powerplug.portrait.fill").font(.system(size: 8, weight: .semibold)) }
                 }
                 .font(.system(size: 11, weight: .medium).monospacedDigit())
                 .lineLimit(1)
