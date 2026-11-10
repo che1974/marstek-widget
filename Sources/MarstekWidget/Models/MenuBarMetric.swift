@@ -1,13 +1,17 @@
 import Foundation
 
 enum MenuBarMetric: String, CaseIterable, Identifiable {
-    case none, soc, load, grid, pv
+    case none, batteryIcon, soc, load, grid, pv
 
     var id: String { rawValue }
+
+    // The glyph only fits the single-line leading slot.
+    static let lineChoices = allCases.filter { $0 != .batteryIcon }
 
     var title: String {
         switch self {
         case .none: return "Nothing"
+        case .batteryIcon: return "Battery Icon"
         case .soc: return "Battery %"
         case .load: return "Load Power"
         case .grid: return "Grid Power"
@@ -17,7 +21,7 @@ enum MenuBarMetric: String, CaseIterable, Identifiable {
 
     func text(for status: CombinedStatus) -> String? {
         switch self {
-        case .none: return nil
+        case .none, .batteryIcon: return nil
         case .soc: return status.soc.map { "\($0)%" }
         case .load: return status.offgridPower.map(formatPower)
         case .grid: return status.gridPower.map(formatPower)
@@ -28,6 +32,10 @@ enum MenuBarMetric: String, CaseIterable, Identifiable {
 
 func menuBarLines(_ status: CombinedStatus, _ metrics: [MenuBarMetric]) -> [String] {
     metrics.compactMap { $0.text(for: status) }
+}
+
+func showsBatteryGlyph(leading: MenuBarMetric, leadingText: String?, lines: [String]) -> Bool {
+    leading == .batteryIcon || (leadingText == nil && lines.isEmpty)
 }
 
 func formatPower(_ watts: Int) -> String {

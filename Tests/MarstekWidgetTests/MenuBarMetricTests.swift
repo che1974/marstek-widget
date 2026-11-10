@@ -32,3 +32,21 @@ import Testing
     s.esMode = ESMode(id: 0, mode: "Auto", ongridPower: nil, offgridPower: nil, batSoc: nil)
     #expect(s.modeLabel == "Auto")
 }
+
+@Test func batteryIconOnlyInLeadingSlot() {
+    #expect(!MenuBarMetric.lineChoices.contains(.batteryIcon))
+    #expect(MenuBarMetric.allCases.contains(.batteryIcon))
+    var s = CombinedStatus()
+    s.esStatus = ESStatus(id: 0, batSoc: 80, batCap: nil, pvPower: nil, ongridPower: nil, offgridPower: nil,
+                          totalPvEnergy: nil, totalGridOutputEnergy: nil, totalGridInputEnergy: nil, totalLoadEnergy: nil)
+    #expect(MenuBarMetric.batteryIcon.text(for: s) == nil)
+}
+
+@Test func batteryGlyphShownWhenPickedOrWhenBarWouldBeEmpty() {
+    #expect(showsBatteryGlyph(leading: .batteryIcon, leadingText: nil, lines: ["80%"]))
+    #expect(showsBatteryGlyph(leading: .none, leadingText: nil, lines: []))
+    #expect(!showsBatteryGlyph(leading: .none, leadingText: nil, lines: ["80%"]))
+    #expect(!showsBatteryGlyph(leading: .load, leadingText: "351 W", lines: []))
+    // No data yet: never leave the status item blank and unclickable.
+    #expect(showsBatteryGlyph(leading: .load, leadingText: nil, lines: []))
+}

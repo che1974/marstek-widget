@@ -4,7 +4,7 @@ struct MenuBarLabel: View {
     @Environment(DeviceMonitor.self) private var monitor
     @AppStorage("menuBarTopLine") private var topLine = MenuBarMetric.soc
     @AppStorage("menuBarBottomLine") private var bottomLine = MenuBarMetric.none
-    @AppStorage("menuBarShowIcon") private var showIcon = true
+    @AppStorage("menuBarLeading") private var leading = MenuBarMetric.batteryIcon
 
     var body: some View {
         Image(nsImage: render())
@@ -18,10 +18,13 @@ struct MenuBarLabel: View {
     @MainActor
     private func render() -> NSImage {
         let lines = menuBarLines(monitor.status, [topLine, bottomLine])
+        let leadingText = leading.text(for: monitor.status)
         let renderer = ImageRenderer(content:
             HStack(spacing: 4) {
-                if showIcon || lines.isEmpty {
+                if showsBatteryGlyph(leading: leading, leadingText: leadingText, lines: lines) {
                     BatteryGlyph(soc: monitor.status.soc, isCharging: monitor.status.showsChargingBolt)
+                } else if let leadingText {
+                    Text(leadingText).font(.system(size: 13, weight: .medium).monospacedDigit())
                 }
                 VStack(alignment: .trailing, spacing: -2) {
                     ForEach(lines.indices, id: \.self) { Text(lines[$0]) }

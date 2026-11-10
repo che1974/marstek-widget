@@ -14,7 +14,7 @@ struct SettingsView: View {
 
     @AppStorage("menuBarTopLine") private var topLine = MenuBarMetric.soc
     @AppStorage("menuBarBottomLine") private var bottomLine = MenuBarMetric.none
-    @AppStorage("menuBarShowIcon") private var showIcon = true
+    @AppStorage("menuBarLeading") private var leading = MenuBarMetric.batteryIcon
     @AppStorage("allowModeSwitch") private var allowModeSwitch = false
 
     private let intervalOptions: [(String, TimeInterval)] = [
@@ -61,13 +61,15 @@ struct SettingsView: View {
             }
 
             Section("Menu Bar") {
-                Picker("Top line", selection: $topLine) {
+                Picker("Left", selection: $leading) {
                     ForEach(MenuBarMetric.allCases) { Text($0.title).tag($0) }
+                }
+                Picker("Top line", selection: $topLine) {
+                    ForEach(MenuBarMetric.lineChoices) { Text($0.title).tag($0) }
                 }
                 Picker("Bottom line", selection: $bottomLine) {
-                    ForEach(MenuBarMetric.allCases) { Text($0.title).tag($0) }
+                    ForEach(MenuBarMetric.lineChoices) { Text($0.title).tag($0) }
                 }
-                Toggle("Show battery icon", isOn: $showIcon)
             }
 
             Section("General") {
