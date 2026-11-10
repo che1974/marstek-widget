@@ -67,28 +67,49 @@ final class DeviceMonitor {
         }
     }
 
-    func poll() {
-        guard let client else { return }
+    // Venus firmware stalls and reboots under bursts of Local API requests, so each tick
+    // sends only ES.GetStatus and the rest go out every few ticks, spaced apart, never overlapping.
+    private static let fullPollEvery = 5
+    private static let requestGap: Duration = .seconds(3)
+    private var isPolling = false
+    private var pollCount = 0
+
+    func poll(full: Bool = false) {
+        guard let client, !isPolling else { return }
+        isPolling = true
+        let fetchAll = full || pollCount % Self.fullPollEvery == 0
+        pollCount += 1
         connectionState = .connecting
 
         Task {
             do {
                 let esResult = try await client.getESStatus()
-                let batResult = try await client.getBatStatus()
-                let emResult = try await client.getEMStatus()
-                let modeResult = try await client.getESMode()
+                var batResult: BatStatus?, emResult: EMStatus?, modeResult: ESMode?
+                if fetchAll {
+                    try await Task.sleep(for: Self.requestGap)
+                    batResult = try await client.getBatStatus()
+                    try await Task.sleep(for: Self.requestGap)
+                    emResult = try await client.getEMStatus()
+                    try await Task.sleep(for: Self.requestGap)
+                    modeResult = try await client.getESMode()
+                }
+                let (bat, em, mode) = (batResult, emResult, modeResult)
 
                 await MainActor.run {
                     self.status.esStatus = esResult
-                    self.status.batStatus = batResult
-                    self.status.emStatus = emResult
-                    self.status.esMode = modeResult
+                    if fetchAll {
+                        self.status.batStatus = bat
+                        self.status.emStatus = em
+                        self.status.esMode = mode
+                    }
                     self.status.lastUpdated = Date()
                     self.connectionState = .connected
+                    self.isPolling = false
                 }
             } catch {
                 await MainActor.run {
                     self.connectionState = .error(error.localizedDescription)
+                    self.isPolling = false
                 }
             }
         }
@@ -111,7 +132,7 @@ final class DeviceMonitor {
                     self.status.esMode = result
                 }
                 // Refresh all data after mode change
-                poll()
+                await MainActor.run { self.poll(full: true) }
             } catch {
                 await MainActor.run {
                     self.connectionState = .error(error.localizedDescription)

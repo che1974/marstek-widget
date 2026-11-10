@@ -12,6 +12,11 @@ struct SettingsView: View {
         case failure
     }
 
+    @AppStorage("menuBarTopLine") private var topLine = MenuBarMetric.soc
+    @AppStorage("menuBarBottomLine") private var bottomLine = MenuBarMetric.none
+    @AppStorage("menuBarShowIcon") private var showIcon = true
+    @AppStorage("allowModeSwitch") private var allowModeSwitch = false
+
     private let intervalOptions: [(String, TimeInterval)] = [
         ("30 seconds", 30),
         ("1 minute", 60),
@@ -55,15 +60,26 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Menu Bar") {
+                Picker("Top line", selection: $topLine) {
+                    ForEach(MenuBarMetric.allCases) { Text($0.title).tag($0) }
+                }
+                Picker("Bottom line", selection: $bottomLine) {
+                    ForEach(MenuBarMetric.allCases) { Text($0.title).tag($0) }
+                }
+                Toggle("Show battery icon", isOn: $showIcon)
+            }
+
             Section("General") {
                 Toggle("Launch at login", isOn: Binding(
                     get: { monitor.launchAtLogin },
                     set: { monitor.launchAtLogin = $0 }
                 ))
+                Toggle("Allow switching mode from menu", isOn: $allowModeSwitch)
             }
         }
         .formStyle(.grouped)
-        .frame(width: 350, height: 280)
+        .frame(width: 350, height: 450)
         .onAppear {
             ipAddress = monitor.deviceIP
             selectedInterval = monitor.pollingInterval

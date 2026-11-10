@@ -2,6 +2,7 @@ import SwiftUI
 
 struct StatusMenuView: View {
     @Environment(DeviceMonitor.self) private var monitor
+    @AppStorage("allowModeSwitch") private var allowModeSwitch = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -41,7 +42,7 @@ struct StatusMenuView: View {
             }
 
             // Mode switcher
-            if monitor.status.esMode != nil {
+            if allowModeSwitch && monitor.status.esMode != nil {
                 Divider()
                 modePicker
             }
@@ -70,7 +71,7 @@ struct StatusMenuView: View {
             .keyboardShortcut(",", modifiers: .command)
 
             Button("Refresh Now") {
-                monitor.poll()
+                monitor.poll(full: true)
             }
             .keyboardShortcut("r", modifiers: .command)
 
@@ -209,13 +210,6 @@ struct StatusMenuView: View {
             return String(format: "%.1f kWh", Double(wh) / 1000)
         }
         return "\(wh) Wh"
-    }
-
-    private func formatPower(_ watts: Int) -> String {
-        if abs(watts) >= 1000 {
-            return String(format: "%.1f kW", Double(watts) / 1000)
-        }
-        return "\(watts) W"
     }
 }
 
